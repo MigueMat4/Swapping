@@ -77,7 +77,7 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
 
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-            System.out.println("ESPACIO LIBRE" + espacio_libre);
+            System.out.println("ESPACIO LIBRE " + espacio_libre);
             this.base = RAM.siguiente_slot_libre;
             System.out.println(this.longitud + " " + espacio_libre);
             if (this.longitud <= espacio_libre) {
@@ -95,7 +95,9 @@ public class frmMain extends javax.swing.JFrame {
                 txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
                 System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
             }
-            
+            else{
+                procesos_en_disco.addElement(this.nombre);
+            }
             FileWriter segundo_registro;
             Scanner lector;
             String info = "";
