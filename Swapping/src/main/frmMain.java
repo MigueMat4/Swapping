@@ -82,6 +82,9 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             this.base = RAM.siguiente_slot_libre;
+            if(RAM.siguiente_slot_libre+this.longitud > 320){//nos pasamos del tam de la RAM
+                System.out.println("Nos pasamos xD");
+            }
             for (int i=0; i<this.longitud; i++) {
                 RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
                 this.limite = RAM.siguiente_slot_libre;
@@ -332,7 +335,7 @@ public void inicar(){
         // Creación de 10 procesos para cargar en memoria principal
         Proceso user_process;
         char letra = 'A';
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<4; i++) {
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
