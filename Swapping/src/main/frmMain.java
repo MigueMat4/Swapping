@@ -87,9 +87,11 @@ public class frmMain extends javax.swing.JFrame {
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             this.base = RAM.siguiente_slot_libre;
             for (int i=0; i<this.longitud; i++) {
-                RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
-                this.limite = RAM.siguiente_slot_libre;
-                RAM.siguiente_slot_libre++;
+                if(RAM.siguiente_slot_libre<319){
+                    RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                    this.limite = RAM.siguiente_slot_libre;
+                    RAM.siguiente_slot_libre++;  
+                }
             }
             RAM.procesos_cargados.add(this);
             texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
