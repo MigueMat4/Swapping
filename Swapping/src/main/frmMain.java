@@ -44,7 +44,7 @@ public class frmMain extends javax.swing.JFrame {
         listProcesos.setModel(procesos_en_disco);
     }
 
-    public class Proceso extends Thread {
+  public class Proceso extends Thread {
 
         private int base;
         private int limite;
@@ -81,21 +81,31 @@ public class frmMain extends javax.swing.JFrame {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
             }
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-            this.base = RAM.siguiente_slot_libre;
-            for (int i = 0; i < this.longitud; i++) {
-                RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
-                this.limite = RAM.siguiente_slot_libre;
-                RAM.siguiente_slot_libre++;
+            
+            if (espacio_libre >= longitud) {
+                this.base = RAM.siguiente_slot_libre;
+                for (int i = 0; i < this.longitud; i++) {
+                    RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                    this.limite = RAM.siguiente_slot_libre;
+                    RAM.siguiente_slot_libre++;
+                }
+                RAM.procesos_cargados.add(this);
+                texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
+                System.out.println(texto);
+                texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
+                System.out.println(texto);
+                texto = this.nombre + " - " + (this.longitud / 10) + "K";
             }
-            RAM.procesos_cargados.add(this);
-            texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - " + (this.longitud / 10) + "K";
+            else
+            {
+                System.out.println("PASAR A DISCO DURO");
+                procesos_en_disco.add(base, this.nombre);
+            }
+
             txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
             mutex.release();
+
             FileWriter segundo_registro;
             Scanner lector;
             String info = "";
@@ -143,10 +153,14 @@ public class frmMain extends javax.swing.JFrame {
                 if (process.nombre.equals("Sistema Operativo")) {
                     g.drawString("Sistema Operativo", 40, 15);
                 } else {
-                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);    
+
                 }
             }
         }
+        
+        
+        
     }
 
     /**
@@ -332,6 +346,7 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
+        
     }//GEN-LAST:event_btnLoadActionPerformed
 
     /**
