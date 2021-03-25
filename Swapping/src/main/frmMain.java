@@ -52,8 +52,6 @@ public class frmMain extends javax.swing.JFrame {
         private final String nombre;
         //Monitor
         boolean turno=true;
-        
-        
         public Proceso(String name) {
             if (name.equals("Sistema Operativo")) {
                 longitud = 20; // 2K
@@ -66,12 +64,9 @@ public class frmMain extends javax.swing.JFrame {
             }
         }
         public synchronized void Operar() throws InterruptedException{
-         //mientras el turno no este disponible el hilo espera
           while(!turno) {
               wait();
           }
-          //si el turno esta disponible, se toma, poniendolo como false para el resto
-          //de hilos
           turno=false;
           for(int i=0;i< this.operaciones;i++){
                   int temp=cuenta;
@@ -79,7 +74,6 @@ public class frmMain extends javax.swing.JFrame {
                   cuenta=temp;
 
           }
-          //el turno se libera y se le notifica a los hilos que estaban en espera
           turno=true;
           notifyAll();
         }
@@ -379,6 +373,47 @@ public class frmMain extends javax.swing.JFrame {
                 new frmMain().setVisible(true);
             }
         });
+    }
+    
+    public int up(int semaforo){
+        semaforo++;
+        return semaforo;
+    }
+    
+    public int down(int semaforo){
+        semaforo--;
+        return semaforo;
+    }
+    
+    public void insertar_elemento(int elemento){
+        int pos = -1; 
+        for (int i=0; i<=4; i++)
+        {
+           // if (bufer[i] == 0)
+                pos = i;
+        }
+        //bufer[pos] = elemento; 
+    }
+    
+//    public int quitar_elemento(){
+//        int elemento;
+//        int pos = -1; 
+//        for (int i=0; i<=4; i++)
+//        {
+//            //if (bufer[i] != 0)
+//                pos = i;
+//        }
+//        //elemento = bufer[pos]; 
+//        //bufer[pos] = 0;
+//        return elemento;
+//    }
+    
+    public void actualizarRegionCritica(){
+        String texto = "";
+        for (int i=0; i<=4; i++){
+        //    texto += "[" + String.valueOf(bufer[i]) + "] ";
+        }
+        //lblRegionCritica.setText(texto);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
