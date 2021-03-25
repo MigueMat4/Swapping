@@ -26,36 +26,37 @@ import javax.swing.DefaultListModel;
  * @author Miguel Matul <https://github.com/MigueMat4>
  */
 public class frmMain extends javax.swing.JFrame {
-
+    
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
     private static Semaphore mutex = new Semaphore(1, true); // Controla el acceso a la región crítica
+    private int ver;
 
     /**
      * Creates new form frmMain
      */
     public frmMain() {
-
+        
         initComponents();
         pnlMemoria.setBackground(Color.GRAY);
         g = pnlMemoria.getGraphics();
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
-
+        ver = 32;
         Proceso proceso = new Proceso("Sistema Operativo");
         proceso.start();
     }
     int restante = 0;
-
+    
     public class Proceso extends Thread {
-
+        
         private int base;
         private int limite;
         private int longitud;
         private final String nombre;
-
+        
         public Proceso(String name) {
             if (name.equals("Sistema Operativo")) {
                 longitud = 20; // 2K
@@ -65,8 +66,9 @@ public class frmMain extends javax.swing.JFrame {
                 longitud = longitud * 10; // De 3K a 12K
                 nombre = "Proceso " + name;
             }
+            
         }
-
+        
         @Override
         public void run() {
             File process_logs = new File(this.nombre + "_logs.txt");
@@ -80,55 +82,66 @@ public class frmMain extends javax.swing.JFrame {
             }
             String texto = "";
             try {
+                
                 mutex.acquire();
-                System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
-
-                this.base = RAM.siguiente_slot_libre;
-                for (int i = 0; i < this.longitud; i++) {
-                    RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
-                    this.limite = RAM.siguiente_slot_libre;
-                    RAM.siguiente_slot_libre++;
-                }
-
-                RAM.procesos_cargados.add(this);
-                texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
-                System.out.println(texto);
-                texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
-                System.out.println(texto);
-                texto = this.nombre + " - " + (this.longitud / 10) + "K";
-                txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
-                System.out.println("Proceso " + this.nombre + " saliendo de la región crítica" + "\n");
-
-                int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-                System.out.println("ESPACIO LIBRE: " + (espacio_libre + 1) / 10 + "k");
-
-                FileWriter segundo_registro;
-                Scanner lector;
-                String info = "";
-                try {
-                    lector = new Scanner(process_logs);
-                    while (lector.hasNextLine()) {
-                        info = lector.nextLine() + "\n";
+                System.out.println("La longitud y ver: " + this.longitud / 10 + " " + ver);
+                if ((this.longitud / 10) < ver) {
+                    System.out.println("SI");
+                    
+                    System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
+                    
+                    this.base = RAM.siguiente_slot_libre;
+                    for (int i = 0; i < this.longitud; i++) {
+                        RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                        this.limite = RAM.siguiente_slot_libre;
+                        RAM.siguiente_slot_libre++;
                     }
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                    RAM.procesos_cargados.add(this);
+                    texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
+                    System.out.println(texto);
+                    texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
+                    System.out.println(texto);
+                    texto = this.nombre + " - " + (this.longitud / 10) + "K";
+                    txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
+                    System.out.println("Proceso " + this.nombre + " saliendo de la región crítica" + "\n");
+                    
+                    int espacio_libre = ((RAM.tope - RAM.siguiente_slot_libre) + 1) / 10;
+                    System.out.println("ESPACIO LIBRE: " + espacio_libre + "k");
+                    ver = espacio_libre;
+                    System.out.println("AAA" + ver + "\n" + "\n");
+                } else {
+                    System.out.println("NO, PASA A DISCO");
+                    procesos_en_disco.addElement(this.nombre + " - " + (this.longitud / 10) + "K");
                 }
-                try {
-                    segundo_registro = new FileWriter(process_logs);
-                    segundo_registro.write(info + "El " + this.nombre + " está listo para ser ejecutado");
-                    segundo_registro.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                
             } catch (InterruptedException ex) {
+                Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            FileWriter segundo_registro;
+            Scanner lector;
+            String info = "";
+            try {
+                lector = new Scanner(process_logs);
+                while (lector.hasNextLine()) {
+                    info = lector.nextLine() + "\n";
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                segundo_registro = new FileWriter(process_logs);
+                segundo_registro.write(info + "El " + this.nombre + " está listo para ser ejecutado");
+                segundo_registro.close();
+            } catch (IOException ex) {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
             }
             mutex.release();
         }
     }
-
+    
     public class Memoria {
-
+        
         public String[] slots = new String[320];
         private int siguiente_slot_libre = 0;
         private final int tope = 319;
@@ -140,7 +153,7 @@ public class frmMain extends javax.swing.JFrame {
                 slots[i] = "";
             }
         }
-
+        
         public void graficarMemoria() {
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while (iterator.hasNext()) {
@@ -157,7 +170,7 @@ public class frmMain extends javax.swing.JFrame {
                 }
             }
             g.drawString("Memoria libre " + ((RAM.tope - RAM.siguiente_slot_libre) + 1) / 10 + "K", 40, 320);
-
+            
         }
     }
 
@@ -324,10 +337,9 @@ public class frmMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-
         Proceso user_process;
         char letra = 'A';
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 10; i++) {
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
