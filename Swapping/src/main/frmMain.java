@@ -31,6 +31,7 @@ public class frmMain extends javax.swing.JFrame {
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
     private static Semaphore mutex = new Semaphore(1, true);
+    private ArrayList<String> discoDuro = new ArrayList<>();
 
     /**
      * Creates new form frmMain
@@ -84,14 +85,19 @@ public class frmMain extends javax.swing.JFrame {
             String texto = "";
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-            this.base = RAM.siguiente_slot_libre;
-            for (int i = 0; i < RAM.slots.length; i++) {
-                RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
-                this.limite = RAM.siguiente_slot_libre;
-                RAM.siguiente_slot_libre++;
+            
+            if (espacio_libre > this.longitud) {
+                this.base = RAM.siguiente_slot_libre;
+                for (int i = 0; i < this.longitud; i++) {
+                    RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                    this.limite = RAM.siguiente_slot_libre;
+                    RAM.siguiente_slot_libre++;
+                }
+                RAM.procesos_cargados.add(this);
+            } else {
+                discoDuro.add(this.nombre + " - " + (this.longitud / 10) + "K");
             }
-            RAM.siguiente_slot_libre = 0;
-            RAM.procesos_cargados.add(this);
+
             texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
             System.out.println(texto);
             texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
@@ -150,6 +156,10 @@ public class frmMain extends javax.swing.JFrame {
                 } else {
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
                 }
+            }
+            
+            for (int x = 0; x < discoDuro.size(); x++) {
+                procesos_en_disco.addElement(discoDuro.get(x));
             }
         }
     }
