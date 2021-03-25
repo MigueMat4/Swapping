@@ -140,7 +140,7 @@ public class frmMain extends javax.swing.JFrame {
                 else
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
             }
-            g.drawString("Memoria libre " + (RAM.tope - RAM.siguiente_slot_libre)+ "K", 30, 320);
+            g.drawString("Memoria libre " + ((RAM.tope - RAM.siguiente_slot_libre)+1)/10 + "K", 30, 320);
             
         }
     }
