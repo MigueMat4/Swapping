@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import java.util.concurrent.Semaphore; 
+import javax.swing.ListModel;
 /**
  *
  * @author Miguel Matul <https://github.com/MigueMat4>
@@ -31,6 +32,7 @@ public class frmMain extends javax.swing.JFrame {
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
     private int disponible = 320;//me  base en el tam de memoria
     private static Semaphore mutex = new Semaphore(1, true);
+     public List<String> procesosdisco = new ArrayList<>();
     /**
      * Creates new form frmMain
      */
@@ -42,6 +44,7 @@ public class frmMain extends javax.swing.JFrame {
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
         inicar();
+        setLocationRelativeTo(null);
     }
     
     public class Proceso extends Thread {
@@ -84,13 +87,19 @@ public class frmMain extends javax.swing.JFrame {
             this.base = RAM.siguiente_slot_libre;
             if(RAM.siguiente_slot_libre+this.longitud > 320){//nos pasamos del tam de la RAM
                 System.out.println("Nos pasamos xD");
-            }
-            for (int i=0; i<this.longitud; i++) {
+//                procesos_en_disco.addElement(this.nombre+" - "+this.longitud+"K");
+            String procesof= this.nombre+" - "+(this.longitud/10)+"K";
+                procesosdisco.add(procesof);
+               
+            }else{
+                   for (int i=0; i<this.longitud; i++) {
                 RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
                 this.limite = RAM.siguiente_slot_libre;
                 RAM.siguiente_slot_libre++;
             }
             RAM.procesos_cargados.add(this);
+            }
+         
             texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
             System.out.println(texto);
             texto = this.nombre + " - Registro límite: " + (this.limite/10 + 1) + "K";
@@ -155,7 +164,11 @@ public class frmMain extends javax.swing.JFrame {
                     System.out.println("el limite es: "+ libre);
                     System.out.println(process.nombre);
                     System.out.println(process.limite+libre/2);
-                    g.drawString(String.valueOf(libre/10)+"K", 60, (process.limite) + libre /2);
+                    if(libre==0){
+                        // en esta parte el tamaño es 0k
+                    }else{
+                        g.drawString(String.valueOf(libre/10)+"K", 60, (process.limite) + libre /2);
+                    }
                 }
             }
         }
@@ -184,6 +197,7 @@ public class frmMain extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         btnLoad = new javax.swing.JButton();
+        inforamcion = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -287,7 +301,9 @@ public class frmMain extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(280, 280, 280))
+                .addGap(90, 90, 90)
+                .addComponent(inforamcion, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(72, 72, 72))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -311,7 +327,9 @@ public class frmMain extends javax.swing.JFrame {
                             .addComponent(pnlMemoria, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jScrollPane1))
                         .addGap(18, 18, 18)
-                        .addComponent(btnLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(inforamcion, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(20, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
@@ -335,16 +353,25 @@ public void inicar(){
         // Creación de 10 procesos para cargar en memoria principal
         Proceso user_process;
         char letra = 'A';
-        for (int i=0; i<4; i++) {
+        for (int i=0; i<10; i++) {
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
         }
         btnStart.setEnabled(false);
+       
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
+procesos_en_disco.addElement("");
         RAM.graficarMemoria();
+         Iterator<String> nombreIterator = procesosdisco.iterator();                    
+                while(nombreIterator.hasNext()){
+                    String elemento = nombreIterator.next();
+                    System.out.print(elemento+" verificar aqui que sucede  ");    
+                    procesos_en_disco.addElement(elemento);
+                }
+                btnLoad.setEnabled(false);
     }//GEN-LAST:event_btnLoadActionPerformed
   
     /**
@@ -385,6 +412,7 @@ public void inicar(){
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnStart;
+    private javax.swing.JLabel inforamcion;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
