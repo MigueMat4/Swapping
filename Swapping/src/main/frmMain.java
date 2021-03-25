@@ -19,7 +19,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
-
+import java.util.concurrent.Semaphore; 
 /**
  *
  * @author Miguel Matul <https://github.com/MigueMat4>
@@ -29,7 +29,8 @@ public class frmMain extends javax.swing.JFrame {
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
-
+    private int disponible = 320;//me  base en el tam de memoria
+    private static Semaphore mutex = new Semaphore(1, true);
     /**
      * Creates new form frmMain
      */
@@ -63,6 +64,11 @@ public class frmMain extends javax.swing.JFrame {
         
         @Override
         public void run(){
+            try { 
+                mutex.acquire();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
             File process_logs = new File(this.nombre + "_logs.txt");
             FileWriter primer_registro;
             try {
@@ -89,6 +95,7 @@ public class frmMain extends javax.swing.JFrame {
             texto = this.nombre + " - " + (this.longitud / 10) + "K";
             txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            mutex.release(); 
             FileWriter segundo_registro;
             Scanner lector;
             String info="";
@@ -325,7 +332,7 @@ public void inicar(){
         // Creación de 10 procesos para cargar en memoria principal
         Proceso user_process;
         char letra = 'A';
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<3; i++) {
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
@@ -336,7 +343,7 @@ public void inicar(){
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
     }//GEN-LAST:event_btnLoadActionPerformed
-
+  
     /**
      * @param args the command line arguments
      */
