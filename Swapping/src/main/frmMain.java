@@ -34,12 +34,15 @@ public class frmMain extends javax.swing.JFrame {
      * Creates new form frmMain
      */
     public frmMain() {
+
         initComponents();
         pnlMemoria.setBackground(Color.GRAY);
         g = pnlMemoria.getGraphics();
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        Proceso proceso = new Proceso("Sistema Operativo");
+        proceso.start();
     }
     
     public class Proceso extends Thread {
@@ -136,6 +139,8 @@ public class frmMain extends javax.swing.JFrame {
             }
         }
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
