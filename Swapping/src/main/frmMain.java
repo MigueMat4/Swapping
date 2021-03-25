@@ -105,15 +105,21 @@ public class frmMain extends javax.swing.JFrame {
             }else{
                 RAM.procesos_discos.add(this);
                 String texto1 = this.nombre + " - " + (this.longitud / 10) + "K";
-                modelo.addElement(texto1);
+                txtTablaProcesos.setText(txtTablaProcesos.getText() + texto1 + "\n");
+                modelo.addElement(this.nombre);
                 listProcesos.setModel(modelo);
             }
-            try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                mutex.release(); // Sale de la región crítica
+            texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
+            System.out.println(texto);
+            texto = this.nombre + " - Registro límite: " + (this.limite/10 + 1) + "K";
+            System.out.println(texto);
+//            try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+            System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            mutex.release(); // Sale de la región crítica
             FileWriter segundo_registro;
             Scanner lector;
             String info="";
@@ -167,8 +173,8 @@ public class frmMain extends javax.swing.JFrame {
             }
             libre = 320-total;
             System.out.println(libre);
-            texto = String.valueOf(libre) + "k";
-            g.drawString(texto, 60, total+10);
+            texto = String.valueOf(libre/10) + "k";
+            g.drawString(texto, 80, total+(libre/2));
         }
     }
     /**
@@ -335,11 +341,6 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // Creación de 10 procesos para cargar en memoria principal
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
         Proceso user_process;
         char letra = 'A';
         for (int i=0; i<10; i++) {
