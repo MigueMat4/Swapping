@@ -42,6 +42,7 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        this.setLocationRelativeTo(null);
     }
 
   public class Proceso extends Thread {
