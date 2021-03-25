@@ -46,7 +46,12 @@ public class frmMain extends javax.swing.JFrame {
         private int base;
         private int limite;
         private int longitud;
+        int operaciones;
+        int transaccion [];
         private final String nombre;
+        //Monitor
+        boolean turno=true;
+        
         
         public Proceso(String name) {
             if (name.equals("Sistema Operativo")) {
@@ -59,7 +64,23 @@ public class frmMain extends javax.swing.JFrame {
                 nombre = "Proceso " + name;
             }
         }
-        
+         //mientras el turno no este disponible el hilo espera
+          while(!turno) {
+              wait();
+          }
+          //si el turno esta disponible, se toma, poniendolo como false para el resto
+          //de hilos
+          turno=false;
+          for(int i=0;i< this.operaciones;i++){
+                  int temp=cuenta;
+                  temp=temp+this.transaccion[i];
+                  cuenta=temp;
+
+          }
+          //el turno se libera y se le notifica a los hilos que estaban en espera
+          turno=true;
+          notifyAll();
+      }
         @Override
         public void run(){
             File process_logs = new File(this.nombre + "_logs.txt");
@@ -136,6 +157,7 @@ public class frmMain extends javax.swing.JFrame {
             }
         }
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
