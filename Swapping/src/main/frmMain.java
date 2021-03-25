@@ -34,6 +34,7 @@ public class frmMain extends javax.swing.JFrame {
      * Creates new form frmMain
      */
     public frmMain() {
+      
 
         initComponents();
         pnlMemoria.setBackground(Color.GRAY);
@@ -41,9 +42,11 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        
         Proceso proceso = new Proceso("Sistema Operativo");
         proceso.start();
     }
+    int restante = 0;
     
     public class Proceso extends Thread {
         private int base;
@@ -137,6 +140,8 @@ public class frmMain extends javax.swing.JFrame {
                 else
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
             }
+            g.drawString("Memoria libre " + (RAM.tope - RAM.siguiente_slot_libre)+ "K", 30, 320);
+            
         }
     }
     
@@ -308,7 +313,7 @@ public class frmMain extends javax.swing.JFrame {
 
        Proceso user_process;
         char letra = 'A';
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<2; i++) {
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
