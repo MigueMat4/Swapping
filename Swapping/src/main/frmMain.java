@@ -86,7 +86,7 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             
-            if (espacio_libre > this.longitud) {
+            if (espacio_libre + 1 > this.longitud) {
                 this.base = RAM.siguiente_slot_libre;
                 for (int i = 0; i < this.longitud; i++) {
                     RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
@@ -153,13 +153,13 @@ public class frmMain extends javax.swing.JFrame {
                 g.fillRect(0, process.base, 170, process.longitud - 1);
                 g.setColor(Color.BLACK);
                 if (process.nombre.equals("Sistema Operativo")) {
-                    g.drawString("Sistema Operativo", 40, 15);
+                    g.drawString("Sistema Operativo", 40, 15); 
                 } else {
-                    pos = (process.base + process.longitud);
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
                 }
+                pos = (process.base + process.longitud);
             }
-            g.drawString(Integer.toString((RAM.tope - RAM.siguiente_slot_libre +1)/10)+"k", 60, pos + (320-pos)/2);
+            g.drawString(Integer.toString((RAM.tope - RAM.siguiente_slot_libre + 1) / 10) + "K", 80, pos + (320-pos)/2);
             
             for (int x = 0; x < discoDuro.size(); x++) {
                 procesos_en_disco.addElement(discoDuro.get(x));
