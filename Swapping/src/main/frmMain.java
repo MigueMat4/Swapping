@@ -40,6 +40,7 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        inicar();
     }
     
     public class Proceso extends Thread {
@@ -121,6 +122,10 @@ public class frmMain extends javax.swing.JFrame {
         }
 
         public void graficarMemoria() {
+             int suma=0;
+            int libre ;
+            int bases;
+            int longitudes;
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while(iterator.hasNext()) {
                 Proceso process = (Proceso) iterator.next();
@@ -133,6 +138,15 @@ public class frmMain extends javax.swing.JFrame {
                     g.drawString("Sistema Operativo", 40, 15);
                 else
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                suma=suma+process.longitud;
+                System.out.println("suma es: "+suma);
+                if(iterator.hasNext()!=true){
+                    libre = 320-suma;
+                    System.out.println("el limite es: "+ libre);
+                    System.out.println(process.nombre);
+                    System.out.println(process.limite+libre/2);
+                    g.drawString(String.valueOf(libre/10)+"K", 60, (process.limite) + libre /2);
+                }
             }
         }
     }
@@ -298,16 +312,17 @@ public class frmMain extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
+public void inicar(){
+    Proceso proceso = new Proceso("Sistema Operativo");
         proceso.start();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
+}
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
+        // Creación de 10 procesos para cargar en memoria principal
         Proceso user_process;
         char letra = 'A';
         for (int i=0; i<10; i++) {
