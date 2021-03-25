@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -26,9 +27,12 @@ import javax.swing.DefaultListModel;
  */
 public class frmMain extends javax.swing.JFrame {
     
+    private int libre=320;
+    private static Semaphore mutex = new Semaphore(1, true);
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
+    
 
     /**
      * Creates new form frmMain
@@ -40,6 +44,7 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        nuevo();
     }
     
     public class Proceso extends Thread {
@@ -320,21 +325,21 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
-        proceso.start();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Proceso user_process;
-        char letra = 'A';
-        for (int i=0; i<10; i++) {
-            user_process = new Proceso(String.valueOf(letra));
-            user_process.start();
-            letra++;
-        }
-        btnStart.setEnabled(false);
+                    //        Proceso proceso = new Proceso("Sistema Operativo");
+                    //        proceso.start();
+                    //        try {
+                    //            Thread.sleep(1000);
+                    //        } catch (InterruptedException ex) {
+                    //            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+                    //        }
+            Proceso user_process;
+            char letra = 'A';
+            for (int i=0; i<10; i++) {
+                user_process = new Proceso(String.valueOf(letra));
+                user_process.start();
+                letra++;
+            }
+            btnStart.setEnabled(false);
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
@@ -409,6 +414,16 @@ public class frmMain extends javax.swing.JFrame {
 //        return elemento;
 //    }
     
+    public void nuevo(){
+    Proceso NuevoProceso = new Proceso("Ordenamiento SO");
+        NuevoProceso.start();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+}
+    
     public void actualizarRegionCritica(){
         String texto = "";
         for (int i=0; i<=4; i++){
@@ -416,6 +431,7 @@ public class frmMain extends javax.swing.JFrame {
         }
         //lblRegionCritica.setText(texto);
     }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLoad;
@@ -434,3 +450,4 @@ public class frmMain extends javax.swing.JFrame {
     private javax.swing.JTextArea txtTablaProcesos;
     // End of variables declaration//GEN-END:variables
 }
+
