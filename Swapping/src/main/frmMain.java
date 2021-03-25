@@ -45,6 +45,7 @@ public class frmMain extends javax.swing.JFrame {
     public class Proceso extends Thread {
         private int base;
         private int limite;
+        int cuenta=0;
         private int longitud;
         int operaciones;
         int transaccion [];
@@ -64,6 +65,7 @@ public class frmMain extends javax.swing.JFrame {
                 nombre = "Proceso " + name;
             }
         }
+        public synchronized void Operar() throws InterruptedException{
          //mientras el turno no este disponible el hilo espera
           while(!turno) {
               wait();
@@ -80,7 +82,7 @@ public class frmMain extends javax.swing.JFrame {
           //el turno se libera y se le notifica a los hilos que estaban en espera
           turno=true;
           notifyAll();
-      }
+        }
         @Override
         public void run(){
             File process_logs = new File(this.nombre + "_logs.txt");
