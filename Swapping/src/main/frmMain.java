@@ -45,7 +45,7 @@ public class frmMain extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
     }
 
-  public class Proceso extends Thread {
+    public class Proceso extends Thread {
 
         private int base;
         private int limite;
@@ -82,7 +82,7 @@ public class frmMain extends javax.swing.JFrame {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
             }
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-            
+
             if (espacio_libre >= longitud) {
                 this.base = RAM.siguiente_slot_libre;
                 for (int i = 0; i < this.longitud; i++) {
@@ -96,14 +96,13 @@ public class frmMain extends javax.swing.JFrame {
                 texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
                 System.out.println(texto);
                 texto = this.nombre + " - " + (this.longitud / 10) + "K";
-            }
-            else
-            {
+                txtTablaProcesos.setText(txtTablaProcesos.getText() + this.nombre + "\n");
+            } else {
                 System.out.println("PASAR A DISCO DURO");
+                txtTablaProcesos.setText(txtTablaProcesos.getText() + this.nombre + "\n");
                 procesos_en_disco.add(base, this.nombre);
             }
 
-            txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
             mutex.release();
 
@@ -154,14 +153,20 @@ public class frmMain extends javax.swing.JFrame {
                 if (process.nombre.equals("Sistema Operativo")) {
                     g.drawString("Sistema Operativo", 40, 15);
                 } else {
-                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);    
+                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
 
                 }
             }
+            float espacioLibre = (RAM.tope - RAM.siguiente_slot_libre) / 10;
+            int espacioM = ((RAM.tope - RAM.siguiente_slot_libre + 2) / 2) + RAM.siguiente_slot_libre;
+            g.setColor(Color.GRAY);
+            g.drawRect(0, RAM.siguiente_slot_libre, 170, RAM.tope - 1);
+            g.setColor(Color.GRAY);
+            g.fillRect(0, RAM.siguiente_slot_libre, 170, RAM.tope - 1);
+            g.setColor(Color.BLACK);
+            g.drawString(Float.toString(espacioLibre) + "K", 80, espacioM);
         }
-        
-        
-        
+
     }
 
     /**
@@ -347,7 +352,7 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
-        
+
     }//GEN-LAST:event_btnLoadActionPerformed
 
     /**
