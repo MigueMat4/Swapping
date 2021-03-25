@@ -144,6 +144,7 @@ public class frmMain extends javax.swing.JFrame {
 
         public void graficarMemoria() {
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
+            int pos = 0;
             while (iterator.hasNext()) {
                 Proceso process = (Proceso) iterator.next();
                 g.setColor(Color.BLACK);
@@ -154,9 +155,11 @@ public class frmMain extends javax.swing.JFrame {
                 if (process.nombre.equals("Sistema Operativo")) {
                     g.drawString("Sistema Operativo", 40, 15);
                 } else {
+                    pos = (process.base + process.longitud);
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
                 }
             }
+            g.drawString(Integer.toString((RAM.tope - RAM.siguiente_slot_libre +1)/10)+"k", 60, pos + (320-pos)/2);
             
             for (int x = 0; x < discoDuro.size(); x++) {
                 procesos_en_disco.addElement(discoDuro.get(x));
