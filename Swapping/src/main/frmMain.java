@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -27,6 +28,7 @@ import javax.swing.DefaultListModel;
 public class frmMain extends javax.swing.JFrame {
     
     private final Memoria RAM = new Memoria();
+    private static Semaphore mutex = new Semaphore(1, true); // Controla el acceso a la región crítica
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
 
@@ -72,6 +74,13 @@ public class frmMain extends javax.swing.JFrame {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
             }
             String texto = "";
+            
+            try {
+                    mutex.acquire(); // Entra a la región crítica
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             this.base = RAM.siguiente_slot_libre;
@@ -88,6 +97,12 @@ public class frmMain extends javax.swing.JFrame {
             texto = this.nombre + " - " + (this.longitud / 10) + "K";
             txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                mutex.release(); // Sale de la región crítica
             FileWriter segundo_registro;
             Scanner lector;
             String info="";
