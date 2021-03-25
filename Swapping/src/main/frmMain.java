@@ -45,10 +45,10 @@ public class frmMain extends javax.swing.JFrame {
     public class Proceso extends Thread {
         private int base;
         private int limite;
-        int cuenta=0;
+        int cont=0;
         private int longitud;
         int operaciones;
-        int transaccion [];
+        int proceso [];
         private final String nombre;
         //Monitor
         boolean turno=true;
@@ -63,15 +63,16 @@ public class frmMain extends javax.swing.JFrame {
                 nombre = "Proceso " + name;
             }
         }
+        //implementacion de monitor 
         public synchronized void Operar() throws InterruptedException{
           while(!turno) {
               wait();
           }
           turno=false;
           for(int i=0;i< this.operaciones;i++){
-                  int temp=cuenta;
-                  temp=temp+this.transaccion[i];
-                  cuenta=temp;
+                  int aux=cont;
+                  aux=aux+this.proceso[i];
+                  cont=aux;
 
           }
           turno=true;
