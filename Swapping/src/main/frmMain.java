@@ -31,6 +31,7 @@ public class frmMain extends javax.swing.JFrame {
     private static Semaphore mutex = new Semaphore(1, true); // Controla el acceso a la región crítica
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
+    DefaultListModel modelo = new DefaultListModel();
 
     /**
      * Creates new form frmMain
@@ -91,17 +92,22 @@ public class frmMain extends javax.swing.JFrame {
                     RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
                 }
                     this.limite = RAM.siguiente_slot_libre;
-                    RAM.siguiente_slot_libre++;  
-                
+                    RAM.siguiente_slot_libre++;   
             }
-            RAM.procesos_cargados.add(this);
-            texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - Registro límite: " + (this.limite/10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - " + (this.longitud / 10) + "K";
-            txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
-            System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            if(this.longitud<=espacio_libre){
+                RAM.procesos_cargados.add(this);
+                //System.out.println(texto);
+                texto = this.nombre + " - Registro límite: " + (this.limite/10 + 1) + "K";
+                //System.out.println(texto);
+                texto = this.nombre + " - " + (this.longitud / 10) + "K";
+                txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
+                //System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            }else{
+                RAM.procesos_discos.add(this);
+                String texto1 = this.nombre + " - " + (this.longitud / 10) + "K";
+                modelo.addElement(texto1);
+                listProcesos.setModel(modelo);
+            }
             try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -132,7 +138,11 @@ public class frmMain extends javax.swing.JFrame {
         public String[] slots = new String[320];
         private int siguiente_slot_libre = 0;
         private final int tope = 319;
+        private int libre = 0;
+        private int total= 0;
+        private String texto;
         public List<Proceso> procesos_cargados = new ArrayList<>();
+        public List<Proceso> procesos_discos = new ArrayList<>();
         // Lista con estructura que tiene nodos que guardan las posiciones iniciales y finales de los espacios libres
         
         public Memoria() {
@@ -143,26 +153,24 @@ public class frmMain extends javax.swing.JFrame {
         public void graficarMemoria() {
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while(iterator.hasNext()) {
-                
                 Proceso process = (Proceso) iterator.next();
-                if(process.limite < 319){
-                    g.setColor(Color.BLACK);
-                    g.drawRect(0, process.base, 170, process.longitud - 1);
-                    g.setColor(Color.WHITE);
-                    g.fillRect(0, process.base, 170, process.longitud - 1);
-                    g.setColor(Color.BLACK);
-                    if (process.nombre.equals("Sistema Operativo")){
-                        g.drawString("Sistema Operativo", 40, 15);
-                    }
-                    else{
-                            System.out.println(process.limite);
-                            g.drawString(process.nombre, 60, process.base + process.longitud / 2);
-                        }
-                }
+                total = total + process.longitud;
+                g.setColor(Color.BLACK);
+                g.drawRect(0, process.base, 170, process.longitud - 1);
+                g.setColor(Color.WHITE);
+                g.fillRect(0, process.base, 170, process.longitud - 1);
+                g.setColor(Color.BLACK);
+                if (process.nombre.equals("Sistema Operativo"))
+                    g.drawString("Sistema Operativo", 40, 15);
+                else
+                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
             }
+            libre = 320-total;
+            System.out.println(libre);
+            texto = String.valueOf(libre) + "k";
+            g.drawString(texto, 60, total+10);
         }
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
