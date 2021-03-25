@@ -89,9 +89,10 @@ public class frmMain extends javax.swing.JFrame {
             for (int i=0; i<this.longitud; i++) {
                 if(RAM.siguiente_slot_libre<319){
                     RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                }
                     this.limite = RAM.siguiente_slot_libre;
                     RAM.siguiente_slot_libre++;  
-                }
+                
             }
             RAM.procesos_cargados.add(this);
             texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
@@ -142,16 +143,22 @@ public class frmMain extends javax.swing.JFrame {
         public void graficarMemoria() {
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while(iterator.hasNext()) {
+                
                 Proceso process = (Proceso) iterator.next();
-                g.setColor(Color.BLACK);
-                g.drawRect(0, process.base, 170, process.longitud - 1);
-                g.setColor(Color.WHITE);
-                g.fillRect(0, process.base, 170, process.longitud - 1);
-                g.setColor(Color.BLACK);
-                if (process.nombre.equals("Sistema Operativo"))
-                    g.drawString("Sistema Operativo", 40, 15);
-                else
-                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                if(process.limite < 319){
+                    g.setColor(Color.BLACK);
+                    g.drawRect(0, process.base, 170, process.longitud - 1);
+                    g.setColor(Color.WHITE);
+                    g.fillRect(0, process.base, 170, process.longitud - 1);
+                    g.setColor(Color.BLACK);
+                    if (process.nombre.equals("Sistema Operativo")){
+                        g.drawString("Sistema Operativo", 40, 15);
+                    }
+                    else{
+                            System.out.println(process.limite);
+                            g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                        }
+                }
             }
         }
     }
