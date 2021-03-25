@@ -324,7 +324,8 @@ public class frmMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-            Proceso user_process;
+        //Creacion de 10 procesos para cargar la memoria principal    
+        Proceso user_process;
             char letra = 'A';
             for (int i=0; i<10; i++) {
                 user_process = new Proceso(String.valueOf(letra));
@@ -333,7 +334,36 @@ public class frmMain extends javax.swing.JFrame {
             }
             btnStart.setEnabled(false);
     }//GEN-LAST:event_btnStartActionPerformed
-
+    public void graficarMemoria() {
+	   int avai;
+             int sum=0;
+            Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
+            while(iterator.hasNext()) {
+                Proceso process = (Proceso) iterator.next();
+                g.setColor(Color.GRAY);
+                g.drawRect(0, process.base, 195, process.longitud - 1);
+                g.setColor(Color.WHITE);
+                g.fillRect(0, process.base, 195, process.longitud - 1);
+                g.setColor(Color.GRAY);
+                if (process.nombre.equals("SISTEMA OPEORTIVO"))
+                    g.drawString("SISTEMA OPEORTIVO", 60, 25);
+                else
+                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                sum=sum+process.longitud;
+                System.out.println(sum);
+                if(iterator.hasNext()!=true){
+                    avai= 320-sum;
+                    System.out.println("el limite es: "+ avai);
+                    System.out.println(process.nombre);
+                    System.out.println(process.limite+avai/2);
+                    if(avai==0){
+                    }else{
+                        g.drawString(String.valueOf(avai/10)+"K", 60, (process.limite) + avai /2);
+                    }
+                }
+            }
+        }
+    
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
         procesos_en_disco.clear();
