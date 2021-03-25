@@ -44,6 +44,8 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        Proceso proceso = new Proceso("Sistema Operativo");
+        proceso.start();
     }
     
     public class Proceso extends Thread {
@@ -86,18 +88,29 @@ public class frmMain extends javax.swing.JFrame {
             }
 
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
-            this.base = RAM.siguiente_slot_libre;
-            for (int i = 0; i < this.longitud; i++) {
-                RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
-                this.limite = RAM.siguiente_slot_libre;
-                RAM.siguiente_slot_libre++;
+            if(this.longitud <= espacio_libre)
+            {
+                this.base = RAM.siguiente_slot_libre;
+                for (int i = 0; i < this.longitud; i++) {
+                    if(RAM.siguiente_slot_libre < 319)
+                    {
+                        RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
+                        this.limite = RAM.siguiente_slot_libre;
+                        RAM.siguiente_slot_libre++;
+                    }
+                }
+                RAM.procesos_cargados.add(this);
+                texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
+                System.out.println(texto);
+                texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
+                System.out.println(texto);
+                texto = this.nombre + " - " + (this.longitud / 10) + "K";
             }
-            RAM.procesos_cargados.add(this);
-            texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - Registro límite: " + (this.limite / 10 + 1) + "K";
-            System.out.println(texto);
-            texto = this.nombre + " - " + (this.longitud / 10) + "K";
+            else
+            {
+                procesos_en_disco.add(base, this.nombre);
+                System.out.println("Aqui pasa en disco duro");
+            }
             txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
             
@@ -319,8 +332,7 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
-        proceso.start();
+        
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
