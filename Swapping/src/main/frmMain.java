@@ -156,7 +156,35 @@ public class frmMain extends javax.swing.JFrame {
             for (int i=0; i<320; i++)
                 slots[i]="";
         }
-
+        public void graficarMemoria() {
+	   int avai;
+             int cont=0;
+            Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
+            while(iterator.hasNext()) {
+                Proceso process = (Proceso) iterator.next();
+                g.setColor(Color.BLACK);
+                g.drawRect(0, process.base, 195, process.longitud - 1);
+                g.setColor(Color.WHITE);
+                g.fillRect(0, process.base, 195, process.longitud - 1);
+                g.setColor(Color.BLACK);
+                if (process.nombre.equals("SISTEMA OPEORTIVO"))
+                    g.drawString("SISTEMA OPEORTIVO", 60, 25);
+                else
+                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                cont=cont+process.longitud;
+                System.out.println(cont);
+                if(iterator.hasNext()!=true){
+                    avai= 320-cont;
+                    System.out.println("limite dentro de"+avai);
+                    System.out.println(process.nombre);
+                    System.out.println(process.limite+avai/2);
+                    if(avai==0){
+                    }else{
+                        g.drawString(String.valueOf(avai/10)+"K", 60, (process.limite) + avai /2);
+                    }
+                }
+            }
+        }
         
     }
 
@@ -334,35 +362,6 @@ public class frmMain extends javax.swing.JFrame {
             }
             btnStart.setEnabled(false);
     }//GEN-LAST:event_btnStartActionPerformed
-    public void graficarMemoria() {
-	   int avai;
-             int sum=0;
-            Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
-            while(iterator.hasNext()) {
-                Proceso process = (Proceso) iterator.next();
-                g.setColor(Color.GRAY);
-                g.drawRect(0, process.base, 195, process.longitud - 1);
-                g.setColor(Color.WHITE);
-                g.fillRect(0, process.base, 195, process.longitud - 1);
-                g.setColor(Color.GRAY);
-                if (process.nombre.equals("SISTEMA OPEORTIVO"))
-                    g.drawString("SISTEMA OPEORTIVO", 60, 25);
-                else
-                    g.drawString(process.nombre, 60, process.base + process.longitud / 2);
-                sum=sum+process.longitud;
-                System.out.println(sum);
-                if(iterator.hasNext()!=true){
-                    avai= 320-sum;
-                    System.out.println("el limite es: "+ avai);
-                    System.out.println(process.nombre);
-                    System.out.println(process.limite+avai/2);
-                    if(avai==0){
-                    }else{
-                        g.drawString(String.valueOf(avai/10)+"K", 60, (process.limite) + avai /2);
-                    }
-                }
-            }
-        }
     
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
