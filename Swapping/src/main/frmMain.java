@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -26,28 +27,38 @@ import javax.swing.DefaultListModel;
  */
 public class frmMain extends javax.swing.JFrame {
     
+    private int libre=320;
+    private static Semaphore mutex = new Semaphore(1, true);
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
+    public List<String> procedimientos = new ArrayList<>();
+    
 
     /**
      * Creates new form frmMain
      */
     public frmMain() {
         initComponents();
+        setLocationRelativeTo(null);
         pnlMemoria.setBackground(Color.GRAY);
         g = pnlMemoria.getGraphics();
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        nuevo();
     }
     
     public class Proceso extends Thread {
         private int base;
         private int limite;
+//        int cont=0;
         private int longitud;
+//        int operaciones;
+//        int proceso [];
         private final String nombre;
-        
+        //Monitor
+//        boolean turno=true;
         public Proceso(String name) {
             if (name.equals("Sistema Operativo")) {
                 longitud = 20; // 2K
@@ -59,14 +70,33 @@ public class frmMain extends javax.swing.JFrame {
                 nombre = "Proceso " + name;
             }
         }
+        //implementacion de monitor 
+//        public synchronized void Operar() throws InterruptedException{
+//          while(!turno) {
+//              wait();
+//          }
+//          turno=false;
+//          for(int i=0;i< this.operaciones;i++){
+//                  int aux=cont;
+//                  aux=aux+this.proceso[i];
+//                  cont=aux;
+//
+//          }
+//          turno=true;
+//          notifyAll();
+//        }
         
         @Override
         public void run(){
+            try { 
+                mutex.acquire();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
             File process_logs = new File(this.nombre + "_logs.txt");
             FileWriter primer_registro;
             try {
                 primer_registro = new FileWriter(process_logs);
-                primer_registro.write("El " + this.nombre + " fue creado el " + LocalDateTime.now());
                 primer_registro.close();
             } catch (IOException ex) {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
@@ -75,11 +105,18 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             this.base = RAM.siguiente_slot_libre;
-            for (int i=0; i<this.longitud; i++) {
+            if(RAM.siguiente_slot_libre + this.longitud > 320){
+            String procedure= this.nombre+" - "+(this.longitud/10)+"K";
+                procedimientos.add(procedure);
+               
+            }else{
+                   for (int i=0; i<this.longitud; i++) {
                 RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
                 this.limite = RAM.siguiente_slot_libre;
                 RAM.siguiente_slot_libre++;
             }
+            RAM.procesos_cargados.add(this);
+            } 
             RAM.procesos_cargados.add(this);
             texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
             System.out.println(texto);
@@ -119,23 +156,38 @@ public class frmMain extends javax.swing.JFrame {
             for (int i=0; i<320; i++)
                 slots[i]="";
         }
-
         public void graficarMemoria() {
+	   int avai;
+             int cont=0;
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while(iterator.hasNext()) {
                 Proceso process = (Proceso) iterator.next();
                 g.setColor(Color.BLACK);
-                g.drawRect(0, process.base, 170, process.longitud - 1);
+                g.drawRect(0, process.base, 195, process.longitud - 1);
                 g.setColor(Color.WHITE);
-                g.fillRect(0, process.base, 170, process.longitud - 1);
+                g.fillRect(0, process.base, 195, process.longitud - 1);
                 g.setColor(Color.BLACK);
-                if (process.nombre.equals("Sistema Operativo"))
-                    g.drawString("Sistema Operativo", 40, 15);
+                if (process.nombre.equals("SISTEMA OPEORTIVO"))
+                    g.drawString("SISTEMA OPEORTIVO", 60, 25);
                 else
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                cont=cont+process.longitud;
+                System.out.println(cont);
+                if(iterator.hasNext()!=true){
+                    avai= 320-cont;
+                    System.out.println("limite dentro de"+avai);
+                    System.out.println(process.nombre);
+                    System.out.println(process.limite+avai/2);
+                    if(avai==0){
+                    }else{
+                        g.drawString(String.valueOf(avai/10)+"K", 60, (process.limite) + avai /2);
+                    }
+                }
             }
         }
+        
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -300,26 +352,26 @@ public class frmMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
-        proceso.start();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        //Creacion de 10 procesos para cargar la memoria principal    
         Proceso user_process;
-        char letra = 'A';
-        for (int i=0; i<10; i++) {
-            user_process = new Proceso(String.valueOf(letra));
-            user_process.start();
-            letra++;
-        }
-        btnStart.setEnabled(false);
+            char letra = 'A';
+            for (int i=0; i<10; i++) {
+                user_process = new Proceso(String.valueOf(letra));
+                user_process.start();
+                letra++;
+            }
+            btnStart.setEnabled(false);
     }//GEN-LAST:event_btnStartActionPerformed
-
+    
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         RAM.graficarMemoria();
+        procesos_en_disco.clear();
+        RAM.graficarMemoria();
+         Iterator<String> nombreIterator = procedimientos.iterator();
+                while(nombreIterator.hasNext()){
+                    String elemento = nombreIterator.next();
+                    procesos_en_disco.addElement(elemento);
+                }
     }//GEN-LAST:event_btnLoadActionPerformed
 
     /**
@@ -356,6 +408,58 @@ public class frmMain extends javax.swing.JFrame {
             }
         });
     }
+    
+    public int up(int semaforo){
+        semaforo++;
+        return semaforo;
+    }
+    
+    public int down(int semaforo){
+        semaforo--;
+        return semaforo;
+    }
+    
+    public void insertar_elemento(int elemento){
+        int pos = -1; 
+        for (int i=0; i<=4; i++)
+        {
+           // if (bufer[i] == 0)
+                pos = i;
+        }
+        //bufer[pos] = elemento; 
+    }
+    
+//    public int quitar_elemento(){
+//        int elemento;
+//        int pos = -1; 
+//        for (int i=0; i<=4; i++)
+//        {
+//            //if (bufer[i] != 0)
+//                pos = i;
+//        }
+//        //elemento = bufer[pos]; 
+//        //bufer[pos] = 0;
+//        return elemento;
+//    }
+    
+    public void nuevo(){
+    Proceso NuevoProceso = new Proceso("Ordenamiento SO");
+        NuevoProceso.start();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+}
+    
+    public void actualizarRegionCritica(){
+        String texto = "";
+        for (int i=0; i<=4; i++){
+        //    texto += "[" + String.valueOf(bufer[i]) + "] ";
+        }
+        //lblRegionCritica.setText(texto);
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLoad;
@@ -374,3 +478,4 @@ public class frmMain extends javax.swing.JFrame {
     private javax.swing.JTextArea txtTablaProcesos;
     // End of variables declaration//GEN-END:variables
 }
+
