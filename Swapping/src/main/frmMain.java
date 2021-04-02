@@ -25,6 +25,7 @@ import javax.swing.DefaultListModel;
  * @author Miguel Matul <https://github.com/MigueMat4>
  */
 public class frmMain extends javax.swing.JFrame {
+     Proceso proceso = new Proceso("Sistema Operativo");
     
     private final Memoria RAM = new Memoria();
     private final Graphics g;
@@ -40,6 +41,7 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+         proceso.start();
     }
     
     public class Proceso extends Thread {
@@ -301,8 +303,7 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
-        proceso.start();
+       
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
