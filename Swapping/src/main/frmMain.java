@@ -19,7 +19,8 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
-
+import java.util.concurrent.Semaphore; 
+import javax.swing.ListModel;
 /**
  *
  * @author Miguel Matul <https://github.com/MigueMat4>
@@ -29,7 +30,9 @@ public class frmMain extends javax.swing.JFrame {
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
-
+    private int disponible = 320;//me  base en el tam de memoria
+    private static Semaphore mutex = new Semaphore(1, true);
+     public List<String> procesosdisco = new ArrayList<>();
     /**
      * Creates new form frmMain
      */
@@ -40,6 +43,8 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+        inicar();
+        setLocationRelativeTo(null);
     }
     
     public class Proceso extends Thread {
@@ -62,6 +67,11 @@ public class frmMain extends javax.swing.JFrame {
         
         @Override
         public void run(){
+            try { 
+                mutex.acquire();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
             File process_logs = new File(this.nombre + "_logs.txt");
             FileWriter primer_registro;
             try {
@@ -75,12 +85,21 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;
             this.base = RAM.siguiente_slot_libre;
-            for (int i=0; i<this.longitud; i++) {
+            if(RAM.siguiente_slot_libre+this.longitud > 320){//nos pasamos del tam de la RAM
+                System.out.println("Nos pasamos xD");
+//                procesos_en_disco.addElement(this.nombre+" - "+this.longitud+"K");
+            String procesof= this.nombre+" - "+(this.longitud/10)+"K";
+                procesosdisco.add(procesof);
+               
+            }else{
+                   for (int i=0; i<this.longitud; i++) {
                 RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre;
                 this.limite = RAM.siguiente_slot_libre;
                 RAM.siguiente_slot_libre++;
             }
             RAM.procesos_cargados.add(this);
+            }
+         
             texto = this.nombre + " - Registro base: " + (this.base/10 + 1) + "K";
             System.out.println(texto);
             texto = this.nombre + " - Registro límite: " + (this.limite/10 + 1) + "K";
@@ -88,6 +107,7 @@ public class frmMain extends javax.swing.JFrame {
             texto = this.nombre + " - " + (this.longitud / 10) + "K";
             txtTablaProcesos.setText(txtTablaProcesos.getText() + texto + "\n");
             System.out.println("Proceso " + this.nombre + " saliendo de la región crítica");
+            mutex.release(); 
             FileWriter segundo_registro;
             Scanner lector;
             String info="";
@@ -121,6 +141,10 @@ public class frmMain extends javax.swing.JFrame {
         }
 
         public void graficarMemoria() {
+             int suma=0;
+            int libre ;
+            int bases;
+            int longitudes;
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while(iterator.hasNext()) {
                 Proceso process = (Proceso) iterator.next();
@@ -133,6 +157,19 @@ public class frmMain extends javax.swing.JFrame {
                     g.drawString("Sistema Operativo", 40, 15);
                 else
                     g.drawString(process.nombre, 60, process.base + process.longitud / 2);
+                suma=suma+process.longitud;
+                System.out.println("suma es: "+suma);
+                if(iterator.hasNext()!=true){
+                    libre = 320-suma;
+                    System.out.println("el limite es: "+ libre);
+                    System.out.println(process.nombre);
+                    System.out.println(process.limite+libre/2);
+                    if(libre==0){
+                        // en esta parte el tamaño es 0k
+                    }else{
+                        g.drawString(String.valueOf(libre/10)+"K", 60, (process.limite) + libre /2);
+                    }
+                }
             }
         }
     }
@@ -298,16 +335,17 @@ public class frmMain extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
+public void inicar(){
+    Proceso proceso = new Proceso("Sistema Operativo");
         proceso.start();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
+}
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
+        // Creación de 10 procesos para cargar en memoria principal
         Proceso user_process;
         char letra = 'A';
         for (int i=0; i<10; i++) {
@@ -316,12 +354,21 @@ public class frmMain extends javax.swing.JFrame {
             letra++;
         }
         btnStart.setEnabled(false);
+       
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
+    procesos_en_disco.clear();
         RAM.graficarMemoria();
+         Iterator<String> nombreIterator = procesosdisco.iterator();                    
+                while(nombreIterator.hasNext()){
+                    String elemento = nombreIterator.next();
+                    System.out.print(elemento+" verificar aqui que sucede  ");    
+                    procesos_en_disco.addElement(elemento);
+                }
+               
     }//GEN-LAST:event_btnLoadActionPerformed
-
+  
     /**
      * @param args the command line arguments
      */
