@@ -212,7 +212,9 @@ public class frmMain extends javax.swing.JFrame {
             }
             
             
-            
+            System.out.println("\nOcupación de la memoria:");
+            for (int i=0; i<320; i++)
+                System.out.println(i+1 + " - " + slots[i]);
         }
     }
 
