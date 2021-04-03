@@ -162,9 +162,10 @@ public class frmMain extends javax.swing.JFrame {
             // Dibujar el espacio libre restante en memoria
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre + 10;
             g.drawString(String.valueOf(espacio_libre / 10)+"K", 85, RAM.siguiente_slot_libre + espacio_libre / 2);
+            // Imprimir en consola todos los slots de la memoria RAM
             System.out.println("\nOcupación de la memoria:");
             for (int i=0; i<320; i++)
-                System.out.println(i+1 + " - " + slots[i]);
+                System.out.println(i+1 + " - " + slots[i]); // Se imprime el espacio y la instrucción del proceso que lo ocupa
         }
     }
 
